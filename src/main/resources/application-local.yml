@@ -1,0 +1,23 @@
+# 로컬 개발 프로파일: docker-compose 로 띄운 MySQL/Redis 에 접속
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/inventory?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: inventory
+    password: inventory1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  jpa:
+    show-sql: true
+
+# 인증/인가 단계에서 사용. 로컬은 개발용 더미 시크릿(운영에서는 절대 사용 금지).
+jwt:
+  secret: local-dev-secret-key-please-change-this-to-a-long-random-value
+  access-token-expiration: 3600000   # 1시간 (ms)
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.flywaydb: info

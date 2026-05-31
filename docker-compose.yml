@@ -1,0 +1,42 @@
+  # 로컬 개발용 인프라(MySQL, Redis)만 컨테이너
+# 애플리케이션은 IDE 또는 ./gradlew bootRun 으로 직접 실행 -> 추후 배포
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: inventory-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: inventory
+      MYSQL_USER: inventory
+      MYSQL_PASSWORD: inventory1234
+      MYSQL_ROOT_PASSWORD: root1234
+      TZ: Asia/Seoul
+    # 한글 등 다국어 데이터를 위해 서버 기본 문자셋을 utf8mb4로 강제
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: inventory-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-data:
+  redis-data:

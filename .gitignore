@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+
+# Gradle wrapper jar는 버전에 포함한다 (재현 가능한 빌드)
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse / VS Code
+.classpath
+.project
+.settings/
+bin/
+.vscode/
+
+# 로그
+*.log
+logs/
+
+# OS
+.DS_Store
+
+# 환경변수 / 비밀값
+.env
+*.env

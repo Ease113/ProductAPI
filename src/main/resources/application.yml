@@ -1,0 +1,26 @@
+# 공통 설정. profile별 차이는 application-{profile}.yml 에서 오버라이드
+spring:
+  application:
+    name: inventory-api
+  profiles:
+    # 별도 지정이 없으면 로컬 개발 프로파일로 동작
+    default: local
+  jpa:
+    hibernate:
+      # 스키마는 Flyway가 단일 소스로 관리하고, JPA는 검증만 수행
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    # 기존 DB에 도입할 경우를 대비해 baseline 허용
+    baseline-on-migrate: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    # 태그/메서드 정렬로 문서 가독성 향상
+    tags-sorter: alpha
+    operations-sorter: method
