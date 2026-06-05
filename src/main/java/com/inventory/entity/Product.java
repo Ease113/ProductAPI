@@ -50,4 +50,10 @@ public class Product {
         this.price = price;
         this.category = category;
     }
+
+    public void update(String name, BigDecimal price, String category) {
+        this.name = name;
+        this.price = price;
+        this.category = category;
+    }
 }
