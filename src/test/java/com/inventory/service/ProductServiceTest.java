@@ -2,6 +2,7 @@ package com.inventory.service;
 
 import com.inventory.dto.request.ProductCreateRequest;
 import com.inventory.dto.request.ProductUpdateRequest;
+import com.inventory.dto.response.PageResponse;
 import com.inventory.dto.response.ProductResponse;
 import com.inventory.entity.Product;
 import com.inventory.exception.BusinessException;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,11 +46,11 @@ class ProductServiceTest {
 
         when(productRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(product), pageable, 1));
 
-        Page<ProductResponse> response = productService.findAll(pageable);
+        PageResponse<ProductResponse> response = productService.findAll(pageable);
 
-        assertThat(response.getContent()).hasSize(1);
-        assertThat(response.getContent().get(0).name()).isEqualTo("Test Product");
-        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.content()).hasSize(1);
+        assertThat(response.content().get(0).name()).isEqualTo("Test Product");
+        assertThat(response.totalElements()).isEqualTo(1);
         verify(productRepository).findAll(pageable);
     }
 

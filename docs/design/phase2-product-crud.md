@@ -3,6 +3,14 @@
 > Status: Draft
 > Created: 2026-06-02
 
+## 2026-06-09 보완 결정: 페이지 목록 캐시 DTO
+
+- 상품 목록은 `Pageable` 기반으로 조회하며 외부 응답은 `PageResponse<ProductResponse>`를 사용한다.
+- Redis에는 Jackson 역직렬화가 어려운 Spring Data의 `PageImpl`을 직접 저장하지 않는다.
+- `ProductService.findAll(Pageable)`이 Repository의 `Page<Product>`를 `PageResponse<ProductResponse>`로 변환해 반환하며, 이 DTO를 목록 캐시에 저장한다.
+- Controller는 서비스가 반환한 `PageResponse`를 추가 변환 없이 `ApiResponse`로 감싼다.
+- 외부 JSON 응답 구조는 기존 `content`, `page`, `size`, `totalElements`, `totalPages`, `first`, `last` 형식을 유지한다.
+
 ## Context
 
 Phase 1로 공통 토대(Repository 4개·`ApiResponse` 봉투·`GlobalExceptionHandler`+`ErrorCode`·임시 `SecurityConfig`·Swagger)는 갖춰졌지만, 아직 요청을 처리하는 **도메인 기능이 하나도 없다**. 엔드포인트가 비어 있어 토대가 실제로 잘 맞물리는지(봉투·예외 변환·Repository) 검증되지 않은 상태다. Phase 2는 그 토대 위에서 상품 5개 API(목록/상세/등록/수정/삭제)를 Spring MVC + JPA 풀스택으로 1회전하며, Phase 1 산출물이 처음으로 "함께" 도는 것을 확인한다. 동시에 이후 모든 도메인 단계가 의존할 **Testcontainers(MySQL) 통합테스트 환경**을 최초 도입한다 — 실제 MySQL 위에서 Flyway 마이그레이션 + Hibernate `validate`가 통과하는지까지 자동 검증하기 위함이다. 상품은 재고(Phase 5)·입출고가 참조하는 가장 기본 엔티티이므로 도메인 중 가장 먼저 구현한다.

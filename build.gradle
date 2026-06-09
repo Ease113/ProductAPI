@@ -44,6 +44,9 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
 
+    // --- Redis 클라이언트 ---
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     // --- API 문서 (Swagger UI) ---
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
 
@@ -62,6 +65,8 @@ dependencies {
     // --- 테스트 ---
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
