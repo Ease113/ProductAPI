@@ -28,13 +28,8 @@ public class ProductController {
     @Operation(summary = "제품 전체 조회", description = "페이지네이션을 지원하는 제품 전체 조회 API")
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> findAll(@ParameterObject Pageable pageable) {
-        return ApiResponse.success(PageResponse.from(productService.findAll(pageable)));
+        return ApiResponse.success(productService.findAll(pageable));
     }
-    // Product 전체 조회
-//    @GetMapping
-//    public ApiResponse<Page<ProductResponse>> findAll(Pageable pageable) {
-//        return ApiResponse.success(productService.findAll(pageable));
-//    }
 
     // Product ID로 단일 조회
     @Operation(summary = "제품 단일 조회", description = "ID로 제품을 조회하는 API")

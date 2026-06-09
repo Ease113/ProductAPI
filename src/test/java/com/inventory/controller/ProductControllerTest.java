@@ -3,13 +3,13 @@ package com.inventory.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.dto.request.ProductCreateRequest;
 import com.inventory.dto.request.ProductUpdateRequest;
+import com.inventory.dto.response.PageResponse;
 import com.inventory.dto.response.ProductResponse;
 import com.inventory.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -89,7 +89,10 @@ class ProductControllerTest {
         );
 
         // 서비스 레이어의 findAll 메서드가 호출되면, 미리 정의된 response 객체를 포함하는 페이지를 반환하도록 설정
-        given(productService.findAll(any(Pageable.class))).willReturn(new PageImpl<>(List.of(response)));
+        PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+                List.of(response), 0, 10, 1, 1, true, true
+        );
+        given(productService.findAll(any(Pageable.class))).willReturn(pageResponse);
         mockMvc.perform(get("/api/products")
                         .param("page", "0")
                         .param("size", "10"))
