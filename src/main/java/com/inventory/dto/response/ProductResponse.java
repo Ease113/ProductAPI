@@ -11,6 +11,12 @@ public record ProductResponse(
         BigDecimal price,
         String category
 ) {
+    /**
+     * 상품 엔티티를 외부 응답 DTO로 변환한다.
+     *
+     * @param product 변환할 상품 엔티티
+     * @return 상품 응답 DTO
+     */
     public static ProductResponse from(Product product) {
         return new ProductResponse(
                 product.getId(),

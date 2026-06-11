@@ -42,6 +42,13 @@ public class Member {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * 인증에 사용할 회원 엔티티를 생성한다.
+     *
+     * @param email 로그인 ID로 사용할 이메일
+     * @param password BCrypt로 암호화된 비밀번호
+     * @param role 회원 역할
+     */
     @Builder
     public Member(String email, String password, Role role) {
         this.email = email;

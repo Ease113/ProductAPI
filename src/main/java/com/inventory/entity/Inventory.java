@@ -42,6 +42,13 @@ public class Inventory {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    /**
+     * 상품별 재고 엔티티를 생성한다.
+     *
+     * @param product 재고가 속한 상품
+     * @param quantity 초기 재고 수량
+     * @param location 재고 보관 위치
+     */
     @Builder
     public Inventory(Product product, Integer quantity, String location) {
         this.product = product;
