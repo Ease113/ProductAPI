@@ -43,6 +43,14 @@ public class Product {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * 상품 엔티티를 생성한다.
+     *
+     * @param name 상품명
+     * @param sku 상품 고유 SKU
+     * @param price 상품 가격
+     * @param category 상품 카테고리
+     */
     @Builder
     public Product(String name, String sku, BigDecimal price, String category) {
         this.name = name;
@@ -51,6 +59,13 @@ public class Product {
         this.category = category;
     }
 
+    /**
+     * 변경 가능한 상품 정보를 갱신한다. SKU는 식별 값이므로 변경하지 않는다.
+     *
+     * @param name 변경할 상품명
+     * @param price 변경할 상품 가격
+     * @param category 변경할 상품 카테고리
+     */
     public void update(String name, BigDecimal price, String category) {
         this.name = name;
         this.price = price;

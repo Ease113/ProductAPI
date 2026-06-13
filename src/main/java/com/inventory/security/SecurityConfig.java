@@ -1,28 +1,82 @@
 package com.inventory.security;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * ⚠️ 임시 보안 설정 — Phase 4에서 JWT 인증/인가로 정식 교체된다. (설계 Decision 3)
+ * JWT 기반 REST API의 인증·인가 필터 체인과 비밀번호 인코더를 구성한다.
  *
- * <p>spring-boot-starter-security가 클래스패스에 있으면 기본값으로 모든 요청이 401이 되어
- * Swagger조차 열리지 않는다. Phase 1~3 동안 개발·문서 확인이 가능하도록 전부 permitAll로
- * 열어둔다. 의존성을 뺐다 넣는 대신 이 설정 Bean 하나만 두어, Phase 4에서 이 파일만
- * 정식 규칙으로 바꾸면 변경이 국소적으로 끝나도록 한 의도다.
+ * <p>서버 세션을 사용하지 않고, 인증 API와 Swagger는 공개하며,
+ * 상품 조회는 USER·ADMIN, 상품 변경은 ADMIN 역할에게만 허용한다.</p>
  */
+@EnableConfigurationProperties({JwtProperties.class})
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+
+    /**
+     * JWT 필터와 인증·인가 오류 처리기를 주입받는다.
+     *
+     * @param jwtAuthenticationFilter Bearer JWT를 검증할 필터
+     * @param jwtAuthenticationEntryPoint 인증 실패 401 응답 처리기
+     * @param jwtAccessDeniedHandler 권한 부족 403 응답 처리기
+     */
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+            JwtAccessDeniedHandler jwtAccessDeniedHandler
+    ) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+    }
+
+    /**
+     * Stateless JWT 인증과 상품 API 역할 규칙을 구성한다.
+     *
+     * @param http Spring Security HTTP 설정 객체
+     * @return 구성된 보안 필터 체인
+     * @throws Exception 보안 설정 구성에 실패한 경우
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 임시: REST API라 세션/CSRF 토큰을 쓰지 않으므로 CSRF 비활성화 + 전체 허용.
         http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    /**
+     * 회원 비밀번호 암호화와 검증에 사용할 BCrypt 인코더를 등록한다.
+     *
+     * @return BCrypt 기반 비밀번호 인코더
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

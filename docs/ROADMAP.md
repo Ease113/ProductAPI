@@ -24,7 +24,7 @@ flowchart LR
     P0["Phase 0 ✅<br/>스캐폴드"] --> P1["Phase 1<br/>공통 기반"]
     P1 --> P2["Phase 2<br/>상품 CRUD"]
     P2 --> P3["Phase 3<br/>Redis 캐싱"]
-    P3 --> P4["Phase 4<br/>인증·JWT"]
+    P3 --> P4["Phase 4 ✅<br/>인증·JWT"]
     P4 --> P5["Phase 5<br/>재고·입출고"]
     P5 --> P6["Phase 6<br/>분산 락·동시성"]
     P6 --> P7["Phase 7<br/>AWS 배포"]
@@ -37,7 +37,7 @@ flowchart LR
 | 1 | 공통 기반 | Repository, 예외처리, 공통 응답, Swagger | S | 예정 |
 | 2 | 상품 CRUD | Spring MVC, DTO, Bean Validation, Testcontainers | M | 예정 |
 | 3 | Redis 캐싱 | `@Cacheable`/`@CacheEvict`, RedisCacheManager | S | 예정 |
-| 4 | 인증·JWT | Spring Security 필터체인, JWT, Redis 블랙리스트 | L | 예정 |
+| 4 | 인증·JWT | Spring Security 필터체인, JWT, Redis 블랙리스트 | L | ✅ 구현 완료 |
 | 5 | 재고·입출고 | 트랜잭션, 도메인 로직, StockLog | M | 예정 |
 | 6 | 분산 락·동시성 | Redis 분산 락, 동시성 통합테스트 | L | 예정 |
 | 7 | AWS 배포 | EC2(jar) / RDS / ElastiCache, prod profile | M | 예정 |
@@ -70,7 +70,7 @@ flowchart LR
 - **산출물**: `config/RedisConfig`(직렬화/`RedisCacheManager`), 조회 `@Cacheable` / 변경 `@CacheEvict`, 캐시 통합테스트(Testcontainers Redis).
 - **DoD**: 동일 조회 2회 시 2번째 DB 미조회(로그/테스트로 확인).
 
-### Phase 4 — 인증·보안 (JWT)
+### Phase 4 — 인증·보안 (JWT) ✅
 - **목표**: 회원가입/로그인(JWT 발급)/로그아웃(토큰 블랙리스트) + 전체 엔드포인트 인가.
 - **산출물**: `MemberService`(BCrypt), `AuthController`, `security/JwtTokenProvider`·`JwtAuthenticationFilter`, `SecurityConfig` 정식 잠금(공개: auth·swagger / 그 외 인증), Redis 로그아웃 블랙리스트, 인증 통합테스트.
 - **DoD**: 토큰 없이 보호 API 401, 로그인 토큰으로 200, 로그아웃 후 해당 토큰 401.

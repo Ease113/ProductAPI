@@ -6,6 +6,8 @@ import com.inventory.dto.request.ProductUpdateRequest;
 import com.inventory.dto.response.PageResponse;
 import com.inventory.dto.response.ProductResponse;
 import com.inventory.service.ProductService;
+import com.inventory.security.JwtTokenProvider;
+import com.inventory.security.JwtAuthenticationFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,6 +39,12 @@ class ProductControllerTest {
 
     @MockitoBean
     private ProductService productService;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     /*
     * 제품 생성 테스트

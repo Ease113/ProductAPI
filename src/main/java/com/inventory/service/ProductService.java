@@ -37,6 +37,14 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    /**
+     * 페이지 조건에 맞는 상품 목록을 조회하고 API용 페이지 DTO로 변환한다.
+     * 동일한 페이지 조건의 결과는 Redis 캐시에 저장된다.
+     *
+     * @param pageable 페이지 번호, 크기, 정렬 조건
+     * @return 상품 목록과 페이지 정보
+     * @throws BusinessException 허용되지 않은 필드로 정렬을 요청한 경우
+     */
     @Cacheable(cacheNames = CacheNames.PRODUCTS,
             key = "#pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()"
     )
@@ -47,6 +55,12 @@ public class ProductService {
         return PageResponse.from(page);
     }
 
+    /**
+     * 요청된 정렬 속성이 상품에서 허용한 필드인지 검증한다.
+     *
+     * @param sort 검증할 정렬 조건
+     * @throws BusinessException 허용되지 않은 정렬 속성이 포함된 경우
+     */
     private void validateSort(Sort sort) {
         for (Sort.Order order : sort) {
             if (!SORTABLE_PROPERTIES.contains(order.getProperty())) {
@@ -54,12 +68,29 @@ public class ProductService {
             }
         }
     }
+
+    /**
+     * ID로 상품을 조회한다. 조회 결과는 상품 ID를 키로 Redis에 캐시된다.
+     *
+     * @param id 조회할 상품 ID
+     * @return 조회된 상품 정보
+     * @throws BusinessException 상품이 존재하지 않는 경우
+     */
     @Cacheable(cacheNames = CacheNames.PRODUCT_DETAIL, key = "#id")
     public ProductResponse findById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
         return ProductResponse.from(product);
     }
+
+    /**
+     * SKU 중복을 확인하고 새로운 상품을 저장한다.
+     * 성공하면 기존 상품 목록 캐시를 모두 제거한다.
+     *
+     * @param request 상품 생성 요청
+     * @return 생성된 상품 정보
+     * @throws BusinessException 동일한 SKU가 이미 존재하는 경우
+     */
     @CacheEvict(cacheNames = CacheNames.PRODUCTS, allEntries = true)
     @Transactional
     public ProductResponse create(ProductCreateRequest request) {
@@ -75,6 +106,15 @@ public class ProductService {
                 .build();
         return ProductResponse.from(productRepository.save(product));
     }
+
+    /**
+     * 기존 상품의 변경 가능한 정보를 수정하고 관련 목록·상세 캐시를 제거한다.
+     *
+     * @param id 수정할 상품 ID
+     * @param request 상품 수정 요청
+     * @return 수정된 상품 정보
+     * @throws BusinessException 상품이 존재하지 않는 경우
+     */
     @Caching(evict = {
             @CacheEvict(cacheNames = CacheNames.PRODUCTS, allEntries = true),
             @CacheEvict(cacheNames = CacheNames.PRODUCT_DETAIL, key = "#id")
@@ -91,6 +131,13 @@ public class ProductService {
         );
         return ProductResponse.from(product);
     }
+
+    /**
+     * 상품을 삭제하고 관련 목록·상세 캐시를 제거한다.
+     *
+     * @param id 삭제할 상품 ID
+     * @throws BusinessException 상품이 존재하지 않는 경우
+     */
     @Caching(evict = {
             @CacheEvict(cacheNames = CacheNames.PRODUCTS, allEntries = true),
             @CacheEvict(cacheNames = CacheNames.PRODUCT_DETAIL, key = "#id")

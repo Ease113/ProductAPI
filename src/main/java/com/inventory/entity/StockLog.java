@@ -49,6 +49,14 @@ public class StockLog {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * 상품의 입출고 이력 엔티티를 생성한다.
+     *
+     * @param product 입출고 대상 상품
+     * @param type 입고 또는 출고 유형
+     * @param quantity 변동 수량
+     * @param reason 입출고 사유
+     */
     @Builder
     public StockLog(Product product, StockType type, Integer quantity, String reason) {
         this.product = product;
